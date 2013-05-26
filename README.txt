@@ -1,3 +1,11 @@
+Binary Hash
+-----------
+
+This comes out of an example hash function I wrote for Boost.Unordered,
+but decided not to publish. So instead I've extracted it and I'm
+converting it to be a more generic extensible binary hash function. The
+original description is below.
+
 Siphash example
 ---------------
 

@@ -65,10 +65,10 @@ namespace binary_hash { namespace siphash_v1 {
     //
     // 'Enable' is used as a SFINAE hook.
 
-    template <typename T, typename Enable = void>
+    template <typename State, typename T, typename Enable = void>
     struct siphash_impl
     {
-        static void update(siphash_state&, T const&);
+        static void update(State&, T const&);
     };
 
     // The implementation of the generic hash function.
@@ -77,7 +77,7 @@ namespace binary_hash { namespace siphash_v1 {
     std::size_t siphash<T>::operator()(T const& x) const
     {
         siphash_state state(key);
-        siphash_impl<T>::update(state, x);
+        siphash_impl<siphash_state, T>::update(state, x);
         return static_cast<std::size_t>(state.finalize());
     }
 
@@ -99,21 +99,21 @@ namespace binary_hash { namespace siphash_v1 {
     // Some general purpose hash implementations, siphash_impl<T>
     // can inherit from these.
 
-    template <typename T>
+    template <typename State, typename T>
     struct siphash_binary_impl
     {
-        static void update(siphash_state& state, int x)
+        static void update(State& state, int x)
         {
             state.update(&x, sizeof(x));
         }
     };
 
-    template <typename T>
+    template <typename State, typename T>
     struct siphash_container_impl
     {
-        static void update(siphash_state& state, T const& x)
+        static void update(State& state, T const& x)
         {
-            siphash_impl<typename T::value_type> value_impl;
+            siphash_impl<State, typename T::value_type> value_impl;
 
             for (typename T::const_iterator begin = x.begin(),
                 end = x.end(); begin != end; ++begin)
@@ -123,17 +123,17 @@ namespace binary_hash { namespace siphash_v1 {
         }
     };
 
-    template <typename T, bool Enable = enable_siphash_binary_array<T>::value>
+    template <typename State, typename T, bool Enable = enable_siphash_binary_array<T>::value>
     struct siphash_binary_container_impl;
 
-    template <typename T>
-    struct siphash_binary_container_impl<T, false> :
-        siphash_container_impl<T> {};
+    template <typename State, typename T>
+    struct siphash_binary_container_impl<State, T, false> :
+        siphash_container_impl<State, T> {};
 
-    template <typename T>
-    struct siphash_binary_container_impl<T, true>
+    template <typename State, typename T>
+    struct siphash_binary_container_impl<State, T, true>
     {
-        static void update(siphash_state& state, T const& x)
+        static void update(State& state, T const& x)
         {
             state.update(&*x.cbegin(), sizeof(T) * x.size());
         }
@@ -141,22 +141,22 @@ namespace binary_hash { namespace siphash_v1 {
 
     // Specialize siphash_impl for various types.
 
-    template <typename T>
-    struct siphash_impl<T,
+    template <typename State, typename T>
+    struct siphash_impl<State, T,
         typename boost::enable_if_c<enable_siphash_binary<T>::value>::type
-    > : siphash_binary_impl<T> {};
+    > : siphash_binary_impl<State, T> {};
 
-    template <typename T, typename Alloc>
-    struct siphash_impl<std::list<T, Alloc> > :
-        siphash_container_impl<T> {};
+    template <typename State, typename T, typename Alloc>
+    struct siphash_impl<State, std::list<T, Alloc> > :
+        siphash_container_impl<State, T> {};
 
-    template <typename T, typename Alloc>
-    struct siphash_impl<std::vector<T, Alloc> > :
-        siphash_binary_container_impl<T> {};
+    template <typename State, typename T, typename Alloc>
+    struct siphash_impl<State, std::vector<T, Alloc> > :
+        siphash_binary_container_impl<State, T> {};
 
-    template <typename T, typename Alloc>
-    struct siphash_impl<std::basic_string<T, std::char_traits<T>, Alloc> > :
-        siphash_binary_container_impl<T> {};
+    template <typename State, typename T, typename Alloc>
+    struct siphash_impl<State, std::basic_string<T, std::char_traits<T>, Alloc> > :
+        siphash_binary_container_impl<State, T> {};
 
     // Specialize the binary trait for builtin types.
 

@@ -15,8 +15,8 @@
 #include <vector>
 #include <list>
 
-namespace binary_hash
-{
+namespace binary_hash { namespace siphash_v1 {
+
     // Random key used to make sure the hash function isn't predictable.
 
     struct sipkey
@@ -199,6 +199,12 @@ namespace binary_hash
     template <> struct enable_siphash_binary<boost::uint128_type> :
         boost::hash_detail::enable_hash_value {};
 #endif
+
+}}
+
+namespace binary_hash {
+    using siphash_v1::generate_sipkey;
+    using siphash_v1::siphash;
 }
 
 #endif

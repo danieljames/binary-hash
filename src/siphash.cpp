@@ -7,8 +7,8 @@
 
 #include <binary_hash/siphash.hpp>
 
-namespace binary_hash
-{
+namespace binary_hash { namespace siphash_v1 {
+
     const unsigned siphash_c = 2;
     const unsigned siphash_d = 4;
 
@@ -88,4 +88,5 @@ namespace binary_hash
 
         return v0 ^ v1 ^ v2 ^ v3;
     }
-}
+
+}}

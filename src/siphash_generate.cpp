@@ -10,8 +10,7 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_int.hpp>
 
-namespace binary_hash
-{
+namespace binary_hash { namespace siphash_v1 {
     sipkey generate_sipkey()
     {
         boost::random_device rng;
@@ -24,4 +23,4 @@ namespace binary_hash
         k.k1 = gen();
         return k;
     }
-}
+}}

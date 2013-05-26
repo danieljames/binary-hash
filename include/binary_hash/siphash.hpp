@@ -15,7 +15,7 @@
 #include <vector>
 #include <list>
 
-namespace hash
+namespace binary_hash
 {
     // Random key used to make sure the hash function isn't predictable.
 

@@ -10,7 +10,7 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_int.hpp>
 
-namespace hash
+namespace binary_hash
 {
     sipkey generate_sipkey()
     {

@@ -11,8 +11,8 @@
 
 int main()
 {
-    boost::unordered_set<int, hash::siphash<int> > x1(0, hash::generate_sipkey());
-    boost::unordered_set<int, hash::siphash<int> > x2(0, hash::generate_sipkey());
+    boost::unordered_set<int, binary_hash::siphash<int> > x1(0, binary_hash::generate_sipkey());
+    boost::unordered_set<int, binary_hash::siphash<int> > x2(0, binary_hash::generate_sipkey());
 
     assert(x1 == x2);
 

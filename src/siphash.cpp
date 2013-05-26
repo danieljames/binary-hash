@@ -7,7 +7,7 @@
 
 #include <binary_hash/siphash.hpp>
 
-namespace hash
+namespace binary_hash
 {
     const unsigned siphash_c = 2;
     const unsigned siphash_d = 4;

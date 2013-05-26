@@ -15,51 +15,7 @@
 #include <vector>
 #include <list>
 
-namespace binary_hash { namespace siphash_v1 {
-
-    // Random key used to make sure the hash function isn't predictable.
-
-    struct sipkey
-    {
-        boost::uint64_t k0, k1;
-    };
-
-    // Generate a secure sipkey.
-    // This only works when boost::random_device is available.
-    sipkey generate_sipkey();
-
-    // This is the class that does the actual hashing.
-
-    struct siphash_state
-    {
-        boost::uint64_t v0, v1, v2, v3;
-        union {
-            boost::uint64_t m;
-            unsigned char buffer[8];
-        };
-        unsigned char buffered;
-        unsigned char b;
-
-        explicit siphash_state(sipkey const&);
-        void update(void const*, unsigned);
-        boost::uint64_t finalize();
-
-    private:
-        void sip_round(unsigned);
-    };
-
-    // The genereric hash function.
-    //
-    // Don't sepecialize this. Unless you really want to.
-
-    template <typename T>
-    struct siphash
-    {
-        sipkey key;
-
-        /* implicit */ siphash(sipkey const& k) : key(k) {}
-        std::size_t operator()(T const&) const;
-    };
+namespace binary_hash { namespace binary_hash_v1 {
 
     // Add support for a type by specializing this class.
     //
@@ -71,15 +27,6 @@ namespace binary_hash { namespace siphash_v1 {
         static void update(State&, T const&);
     };
 
-    // The implementation of the generic hash function.
-
-    template <typename T>
-    std::size_t siphash<T>::operator()(T const& x) const
-    {
-        siphash_state state(key);
-        siphash_impl<siphash_state, T>::update(state, x);
-        return static_cast<std::size_t>(state.finalize());
-    }
 
     // A couple of basic traits for hashing binary data.
 
@@ -199,6 +146,68 @@ namespace binary_hash { namespace siphash_v1 {
     template <> struct enable_siphash_binary<boost::uint128_type> :
         boost::hash_detail::enable_hash_value {};
 #endif
+
+}}
+
+namespace binary_hash {
+    using binary_hash_v1::siphash_impl;
+}
+
+namespace binary_hash { namespace siphash_v1 {
+
+    // Random key used to make sure the hash function isn't predictable.
+
+    struct sipkey
+    {
+        boost::uint64_t k0, k1;
+    };
+
+    // Generate a secure sipkey.
+    // This only works when boost::random_device is available.
+    sipkey generate_sipkey();
+
+    // This is the class that does the actual hashing.
+
+    struct siphash_state
+    {
+        boost::uint64_t v0, v1, v2, v3;
+        union {
+            boost::uint64_t m;
+            unsigned char buffer[8];
+        };
+        unsigned char buffered;
+        unsigned char b;
+
+        explicit siphash_state(sipkey const&);
+        void update(void const*, unsigned);
+        boost::uint64_t finalize();
+
+    private:
+        void sip_round(unsigned);
+    };
+
+    // The genereric hash function.
+    //
+    // Don't sepecialize this. Unless you really want to.
+
+    template <typename T>
+    struct siphash
+    {
+        sipkey key;
+
+        /* implicit */ siphash(sipkey const& k) : key(k) {}
+        std::size_t operator()(T const&) const;
+    };
+
+    // The implementation of the generic hash function.
+
+    template <typename T>
+    std::size_t siphash<T>::operator()(T const& x) const
+    {
+        siphash_state state(key);
+        binary_hash::siphash_impl<siphash_state, T>::update(state, x);
+        return static_cast<std::size_t>(state.finalize());
+    }
 
 }}
 

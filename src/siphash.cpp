@@ -5,7 +5,7 @@
 
 // This is also released into the public domain.
 
-#include "siphash.hpp"
+#include <binary_hash/siphash.hpp>
 
 namespace hash
 {

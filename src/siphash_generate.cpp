@@ -5,7 +5,7 @@
 
 // This is also released into the public domain.
 
-#include "siphash.hpp"
+#include <binary_hash/siphash.hpp>
 #include <boost/random/random_device.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_int.hpp>

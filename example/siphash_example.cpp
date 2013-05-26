@@ -7,7 +7,7 @@
 
 #include <boost/unordered_set.hpp>
 #include <cassert>
-#include "siphash.hpp"
+#include <binary_hash/siphash.hpp>
 
 int main()
 {

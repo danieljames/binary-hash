@@ -22,7 +22,7 @@ namespace binary_hash { namespace binary_hash_v1 {
     // 'Enable' is used as a SFINAE hook.
 
     template <typename State, typename T, typename Enable = void>
-    struct siphash_impl
+    struct hash_impl
     {
         static void update(State&, T const&);
     };
@@ -30,24 +30,24 @@ namespace binary_hash { namespace binary_hash_v1 {
 
     // A couple of basic traits for hashing binary data.
 
-    struct enable_siphash_false { enum { value = false }; };
-    struct enable_siphash_true { enum { value = true }; };
+    struct enable_hash_false { enum { value = false }; };
+    struct enable_hash_true { enum { value = true }; };
 
     template <typename T>
-    struct enable_siphash_binary : enable_siphash_false {};
+    struct enable_hash_binary : enable_hash_false {};
 
     template <typename T>
-    struct enable_siphash_binary_array
+    struct enable_hash_binary_array
     {
-        enum { value = enable_siphash_binary<T>::value &&
+        enum { value = enable_hash_binary<T>::value &&
             sizeof(T[2]) == sizeof(T) * 2 };
     };
 
-    // Some general purpose hash implementations, siphash_impl<T>
+    // Some general purpose hash implementations, hash_impl<T>
     // can inherit from these.
 
     template <typename State, typename T>
-    struct siphash_binary_impl
+    struct hash_binary_impl
     {
         static void update(State& state, int x)
         {
@@ -56,11 +56,11 @@ namespace binary_hash { namespace binary_hash_v1 {
     };
 
     template <typename State, typename T>
-    struct siphash_container_impl
+    struct hash_container_impl
     {
         static void update(State& state, T const& x)
         {
-            siphash_impl<State, typename T::value_type> value_impl;
+            hash_impl<State, typename T::value_type> value_impl;
 
             for (typename T::const_iterator begin = x.begin(),
                 end = x.end(); begin != end; ++begin)
@@ -70,15 +70,15 @@ namespace binary_hash { namespace binary_hash_v1 {
         }
     };
 
-    template <typename State, typename T, bool Enable = enable_siphash_binary_array<T>::value>
-    struct siphash_binary_container_impl;
+    template <typename State, typename T, bool Enable = enable_hash_binary_array<T>::value>
+    struct hash_binary_container_impl;
 
     template <typename State, typename T>
-    struct siphash_binary_container_impl<State, T, false> :
-        siphash_container_impl<State, T> {};
+    struct hash_binary_container_impl<State, T, false> :
+        hash_container_impl<State, T> {};
 
     template <typename State, typename T>
-    struct siphash_binary_container_impl<State, T, true>
+    struct hash_binary_container_impl<State, T, true>
     {
         static void update(State& state, T const& x)
         {
@@ -86,71 +86,71 @@ namespace binary_hash { namespace binary_hash_v1 {
         }
     };
 
-    // Specialize siphash_impl for various types.
+    // Specialize hash_impl for various types.
 
     template <typename State, typename T>
-    struct siphash_impl<State, T,
-        typename boost::enable_if_c<enable_siphash_binary<T>::value>::type
-    > : siphash_binary_impl<State, T> {};
+    struct hash_impl<State, T,
+        typename boost::enable_if_c<enable_hash_binary<T>::value>::type
+    > : hash_binary_impl<State, T> {};
 
     template <typename State, typename T, typename Alloc>
-    struct siphash_impl<State, std::list<T, Alloc> > :
-        siphash_container_impl<State, T> {};
+    struct hash_impl<State, std::list<T, Alloc> > :
+        hash_container_impl<State, T> {};
 
     template <typename State, typename T, typename Alloc>
-    struct siphash_impl<State, std::vector<T, Alloc> > :
-        siphash_binary_container_impl<State, T> {};
+    struct hash_impl<State, std::vector<T, Alloc> > :
+        hash_binary_container_impl<State, T> {};
 
     template <typename State, typename T, typename Alloc>
-    struct siphash_impl<State, std::basic_string<T, std::char_traits<T>, Alloc> > :
-        siphash_binary_container_impl<State, T> {};
+    struct hash_impl<State, std::basic_string<T, std::char_traits<T>, Alloc> > :
+        hash_binary_container_impl<State, T> {};
 
     // Specialize the binary trait for builtin types.
 
-    template <> struct enable_siphash_binary<bool> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<char> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<unsigned char> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<signed char> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<short> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<unsigned short> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<int> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<unsigned int> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<long> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<unsigned long> :
-        enable_siphash_true {};
+    template <> struct enable_hash_binary<bool> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<char> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<unsigned char> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<signed char> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<short> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<unsigned short> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<int> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<unsigned int> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<long> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<unsigned long> :
+        enable_hash_true {};
 
 #if !defined(BOOST_NO_INTRINSIC_WCHAR_T)
-    template <> struct enable_siphash_binary<wchar_t> :
-        enable_siphash_true {};
+    template <> struct enable_hash_binary<wchar_t> :
+        enable_hash_true {};
 #endif
 
 #if !defined(BOOST_NO_LONG_LONG)
-    template <> struct enable_siphash_binary<boost::long_long_type> :
-        enable_siphash_true {};
-    template <> struct enable_siphash_binary<boost::ulong_long_type> :
-        enable_siphash_true {};
+    template <> struct enable_hash_binary<boost::long_long_type> :
+        enable_hash_true {};
+    template <> struct enable_hash_binary<boost::ulong_long_type> :
+        enable_hash_true {};
 #endif
 
 #if defined(BOOST_HAS_INT128)
-    template <> struct enable_siphash_binary<boost::int128_type> :
+    template <> struct enable_hash_binary<boost::int128_type> :
         boost::hash_detail::enable_hash_value {};
-    template <> struct enable_siphash_binary<boost::uint128_type> :
+    template <> struct enable_hash_binary<boost::uint128_type> :
         boost::hash_detail::enable_hash_value {};
 #endif
 
 }}
 
 namespace binary_hash {
-    using binary_hash_v1::siphash_impl;
+    using binary_hash_v1::hash_impl;
 }
 
 namespace binary_hash { namespace siphash_v1 {
@@ -205,7 +205,7 @@ namespace binary_hash { namespace siphash_v1 {
     std::size_t siphash<T>::operator()(T const& x) const
     {
         siphash_state state(key);
-        binary_hash::siphash_impl<siphash_state, T>::update(state, x);
+        binary_hash::hash_impl<siphash_state, T>::update(state, x);
         return static_cast<std::size_t>(state.finalize());
     }
 
